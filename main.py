@@ -2,7 +2,9 @@ from typing import List
 import cv2
 import numpy as np
 
-img = cv2.imread("tshirt.jpg")
+IMAGE_PATH = "./images/tshirt2.jpeg"
+
+img = cv2.imread(IMAGE_PATH)
 # resize the image by a factor of 0.5
 img = cv2.resize(img, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_CUBIC)
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

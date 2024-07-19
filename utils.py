@@ -55,18 +55,24 @@ def get_right_shoulder(points):
     return right_shoulder
 
 
-def calculate_width(points):
+def calculate_width(points, metric_per_pixel):
     """Returns width"""
     bottom_left, bottom_right = points["bottom_left"], points["bottom_right"]
-    dist = np.linalg.norm(np.array(bottom_right) - np.array(bottom_left))
+    dist = (
+        np.linalg.norm(np.array(bottom_right) - np.array(bottom_left))
+        / metric_per_pixel
+    )
     return {"start": bottom_left, "end": bottom_right, "distance": dist}
 
 
-def calculate_shoulder_length(points):
+def calculate_shoulder_length(points, metric_per_pixel):
     """Returns shoulder length"""
     left_shoulder = get_left_shoulder(points)
     right_shoulder = get_right_shoulder(points)
-    dist = np.linalg.norm(np.array(left_shoulder) - np.array(right_shoulder))
+    dist = (
+        np.linalg.norm(np.array(left_shoulder) - np.array(right_shoulder))
+        / metric_per_pixel
+    )
     return {"start": left_shoulder, "end": right_shoulder, "distance": dist}
 
 
@@ -78,30 +84,35 @@ def get_collar_points(points: list[tuple[int, int]]):
     return collars
 
 
-def calculate_collar(points):
+def calculate_collar(points, metric_per_pixel):
     """Returns length"""
     left_collar, right_collar = points["left_collar"], points["right_collar"]
-    dist = np.linalg.norm(np.array(left_collar) - np.array(right_collar))
+    dist = (
+        np.linalg.norm(np.array(left_collar) - np.array(right_collar))
+        / metric_per_pixel
+    )
     return {"start": left_collar, "end": right_collar, "distance": dist}
 
 
-def calculate_length(points):
+def calculate_length(points, metric_per_pixel):
     """Returns length"""
     bottom_left, collar_left = points["bottom_left"].copy(), points["left_collar"]
     bottom_left[0] = collar_left[0]
-    dist = np.linalg.norm(np.array(collar_left) - np.array(bottom_left))
+    dist = (
+        np.linalg.norm(np.array(collar_left) - np.array(bottom_left)) / metric_per_pixel
+    )
     return {"start": collar_left, "end": bottom_left, "distance": dist}
 
 
-def get_measurements(points):
+def get_measurements(points, metric_per_pixel):
     """Returns measurements from points"""
     measurements = {}
     poi = {}
     poi["bottom_left"], poi["bottom_right"] = get_bottom_left_right(points)
     poi["left_collar"], poi["right_collar"] = get_collar_points(points)
 
-    measurements["width"] = calculate_width(poi)
-    measurements["collar"] = calculate_collar(poi)
-    measurements["length"] = calculate_length(poi)
+    measurements["width"] = calculate_width(poi, metric_per_pixel)
+    measurements["collar"] = calculate_collar(poi, metric_per_pixel)
+    measurements["length"] = calculate_length(poi, metric_per_pixel)
     # measurements["shoulder_length"] = calculate_shoulder_length(points)
     return measurements
