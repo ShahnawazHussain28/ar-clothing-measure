@@ -1,18 +1,11 @@
-import sys
 from typing import List
 import cv2
 import numpy as np
 from utils import draw_points_on_image, get_measurements, draw_measurements
 
-from os import walk
 
-IMAGE_DIR = "./images"
-filenames = next(walk(IMAGE_DIR), (None, None, []))[2]
-IMAGE_PATH = "./images/" + filenames[0]
 CONTRAST = 2  # Experiment with values between 1 (no change) and 10 (high contrast)
 BRIGHTNESS = 1  # Adjust brightness as needed (positive values increase brightness)
-
-image = cv2.imread(IMAGE_PATH)
 
 
 def resize_with_aspect_ratio(image, width):
@@ -118,17 +111,3 @@ def get_measurements_from_image(img):
 
     measurements = get_measurements(points, pixel_per_metric)
     return measurements
-
-
-# print("Length: ", str(round(measurements["length"]["distance"], 2)) + " cm")
-# print("Width: ", str(round(measurements["width"]["distance"], 2)) + " cm")
-# print("Shoulder: ", str(round(measurements["width"]["distance"] * 0.9, 2)) + " cm")
-# print("\n\n")
-# for key in measurements:
-#     blank_image = draw_measurements(blank_image, measurements[key])
-#
-#
-# cv2.imshow("img", adjusted_image)
-# cv2.imshow("imageContour", blank_image)
-# if cv2.waitKey(0) & 0xFF == 27:
-#     cv2.destroyAllWindows()
