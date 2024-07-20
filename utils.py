@@ -84,6 +84,15 @@ def get_collar_points(points: list[tuple[int, int]]):
     return collars
 
 
+def get_sleeve_points(points: list[tuple[int, int]]):
+    """Returns top 2 points as collar points"""
+    l = sorted(points, key=lambda p: p[0])
+    r = sorted(points, key=lambda p: p[0], reverse=True)
+    left_sleeve = l[0]
+    right_sleeve = r[0]
+    return left_sleeve, right_sleeve
+
+
 def calculate_collar(points, metric_per_pixel):
     """Returns length"""
     left_collar, right_collar = points["left_collar"], points["right_collar"]
@@ -92,6 +101,15 @@ def calculate_collar(points, metric_per_pixel):
         / metric_per_pixel
     )
     return {"start": left_collar, "end": right_collar, "distance": dist}
+
+
+def calculate_sleeve(points, metric_per_pixel):
+    """Returns length"""
+    left_sleeve, right_sleeve = points["left_most"].copy(), points["right_most"].copy()
+    total_dist = np.linalg.norm(np.array(left_sleeve) - np.array(right_sleeve))
+    sleeve = total_dist - (points["bottom_right"][0] - points["bottom_left"][0])
+    dist = (sleeve / 2) * 1.1 / metric_per_pixel
+    return {"start": left_sleeve, "end": right_sleeve, "distance": dist}
 
 
 def calculate_length(points, metric_per_pixel):
@@ -110,9 +128,9 @@ def get_measurements(points, metric_per_pixel):
     poi = {}
     poi["bottom_left"], poi["bottom_right"] = get_bottom_left_right(points)
     poi["left_collar"], poi["right_collar"] = get_collar_points(points)
+    poi["left_most"], poi["right_most"] = get_sleeve_points(points)
 
-    measurements["width"] = calculate_width(poi, metric_per_pixel)
-    measurements["collar"] = calculate_collar(poi, metric_per_pixel)
     measurements["length"] = calculate_length(poi, metric_per_pixel)
-    # measurements["shoulder_length"] = calculate_shoulder_length(points)
+    measurements["shoulder"] = calculate_width(poi, metric_per_pixel)
+    measurements["sleeve"] = calculate_sleeve(poi, metric_per_pixel)
     return measurements
