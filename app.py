@@ -35,5 +35,5 @@ def process_image():
         )
     res = {}
     for key in measurements:
-        res[key] = measurements[key]["distance"]
+        res[key] = round(measurements[key]["distance"], 2)
     return jsonify(res), 200
