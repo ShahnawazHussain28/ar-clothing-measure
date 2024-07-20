@@ -6,6 +6,8 @@ from main import get_measurements_from_image
 
 app = Flask(__name__)
 
+print("v-0.1.0")
+
 
 @app.route("/")
 def hello_world():
