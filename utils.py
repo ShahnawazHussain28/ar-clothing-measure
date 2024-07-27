@@ -60,7 +60,7 @@ def calculate_width(points, metric_per_pixel):
     bottom_left, bottom_right = points["bottom_left"], points["bottom_right"]
     dist = (
         np.linalg.norm(np.array(bottom_right) - np.array(bottom_left))
-        / metric_per_pixel
+        * metric_per_pixel
     )
     return {"start": bottom_left, "end": bottom_right, "distance": dist}
 
@@ -71,7 +71,7 @@ def calculate_shoulder_length(points, metric_per_pixel):
     right_shoulder = get_right_shoulder(points)
     dist = (
         np.linalg.norm(np.array(left_shoulder) - np.array(right_shoulder))
-        / metric_per_pixel
+        * metric_per_pixel
     )
     return {"start": left_shoulder, "end": right_shoulder, "distance": dist}
 
@@ -98,7 +98,7 @@ def calculate_collar(points, metric_per_pixel):
     left_collar, right_collar = points["left_collar"], points["right_collar"]
     dist = (
         np.linalg.norm(np.array(left_collar) - np.array(right_collar))
-        / metric_per_pixel
+        * metric_per_pixel
     )
     return {"start": left_collar, "end": right_collar, "distance": dist}
 
@@ -108,7 +108,7 @@ def calculate_sleeve(points, metric_per_pixel):
     left_sleeve, right_sleeve = points["left_most"].copy(), points["right_most"].copy()
     total_dist = np.linalg.norm(np.array(left_sleeve) - np.array(right_sleeve))
     sleeve = total_dist - (points["bottom_right"][0] - points["bottom_left"][0])
-    dist = (sleeve / 2) * 1.1 / metric_per_pixel
+    dist = (sleeve / 2) * 1.1 * metric_per_pixel
     return {"start": left_sleeve, "end": right_sleeve, "distance": dist}
 
 
@@ -117,7 +117,7 @@ def calculate_length(points, metric_per_pixel):
     bottom_left, collar_left = points["bottom_left"].copy(), points["left_collar"]
     bottom_left[0] = collar_left[0]
     dist = (
-        np.linalg.norm(np.array(collar_left) - np.array(bottom_left)) / metric_per_pixel
+        np.linalg.norm(np.array(collar_left) - np.array(bottom_left)) * metric_per_pixel
     )
     return {"start": collar_left, "end": bottom_left, "distance": dist}
 
@@ -134,3 +134,17 @@ def get_measurements(points, metric_per_pixel):
     measurements["shoulder"] = calculate_width(poi, metric_per_pixel)
     measurements["sleeve"] = calculate_sleeve(poi, metric_per_pixel)
     return measurements
+
+
+def get_metric_per_pixel_customer(lmlist, real_height):
+    """Returns metric per pixel"""
+    height = lmlist[30][1] - lmlist[2][1]
+    return real_height / height
+
+
+def get_shoulder_length(lmlist, metric_per_pixel):
+    """Returns shoulder length"""
+    left_x = lmlist[12][0]
+    right_x = lmlist[11][0]
+    dist = abs(right_x - left_x) * 1.075 * metric_per_pixel
+    return dist

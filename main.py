@@ -4,7 +4,7 @@ import numpy as np
 from utils import draw_points_on_image, get_measurements, draw_measurements
 
 
-CONTRAST = 2  # Experiment with values between 1 (no change) and 10 (high contrast)
+CONTRAST = 1  # Experiment with values between 1 (no change) and 10 (high contrast)
 BRIGHTNESS = 1  # Adjust brightness as needed (positive values increase brightness)
 
 
@@ -51,20 +51,27 @@ def get_shirt_contour(contours: List):
 
 def get_note_contour(contours: List):
     for c in contours:
-        if cv2.contourArea(c) > 5000 and cv2.contourArea(c) < 20000:
+        if cv2.contourArea(c) > 3000 and cv2.contourArea(c) < 20000:
             return c
     return None
 
 
-def get_measurements_from_image(img):
+def get_measurements_from_image(img, debug=False):
     img = resize_with_aspect_ratio(img, 800)
     adjusted_image = adjust_brightness_contrast(img.copy(), CONTRAST, BRIGHTNESS)
     r, g, b = cv2.split(adjusted_image)
     blank_image = np.zeros((img.shape[0], img.shape[1]), np.uint8)
+    cv2.imshow("img", img)
+    cv2.imshow("adjusted_image", adjusted_image)
 
     blurredr = blur_image_n_times(r, 3)
     blurredg = blur_image_n_times(g, 3)
     blurredb = blur_image_n_times(b, 3)
+
+    if debug:
+        cv2.imshow("blurred r", blurredr)
+        cv2.imshow("blurred g", blurredg)
+        cv2.imshow("blurred b", blurredb)
 
     erodedr = detect_edges(blurredr)
     erodedg = detect_edges(blurredg)
@@ -72,16 +79,32 @@ def get_measurements_from_image(img):
     eroded = cv2.bitwise_or(erodedr, erodedg)
     eroded = cv2.bitwise_or(eroded, erodedb)
 
+    if debug:
+        cv2.imshow("eroded", eroded)
+
     contours = get_all_contours(eroded)
     shirt_contour = get_shirt_contour(contours)
     note_contour = get_note_contour(contours)
+    print([cv2.contourArea(c) for c in contours])
+
+    if debug:
+        blank_image = cv2.drawContours(
+            blank_image, [shirt_contour], 0, (255, 255, 255), 1
+        )
+        blank_image = cv2.drawContours(
+            blank_image, [note_contour], 0, (255, 255, 255), 1
+        )
+        cv2.imshow("image", img)
+        cv2.imshow("shirt contour", blank_image)
+        cv2.waitKey(0)
+
     if shirt_contour is None or note_contour is None:
         return None
 
     note_rect = cv2.boundingRect(note_contour)
     note_width = note_rect[2]
     real_width = 14.2  # centimeters
-    pixel_per_metric = note_width / real_width
+    metric_per_pixel = real_width / note_width
 
     blank_image = cv2.drawContours(blank_image, [shirt_contour], 0, (255, 255, 255), 1)
     blank_image = cv2.drawContours(blank_image, [note_contour], 0, (255, 255, 255), 1)
@@ -109,5 +132,5 @@ def get_measurements_from_image(img):
         1,
     )
 
-    measurements = get_measurements(points, pixel_per_metric)
+    measurements = get_measurements(points, metric_per_pixel)
     return measurements
