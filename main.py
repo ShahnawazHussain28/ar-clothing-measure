@@ -61,8 +61,6 @@ def get_measurements_from_image(img, debug=False):
     adjusted_image = adjust_brightness_contrast(img.copy(), CONTRAST, BRIGHTNESS)
     r, g, b = cv2.split(adjusted_image)
     blank_image = np.zeros((img.shape[0], img.shape[1]), np.uint8)
-    cv2.imshow("img", img)
-    cv2.imshow("adjusted_image", adjusted_image)
 
     blurredr = blur_image_n_times(r, 3)
     blurredg = blur_image_n_times(g, 3)
@@ -85,7 +83,6 @@ def get_measurements_from_image(img, debug=False):
     contours = get_all_contours(eroded)
     shirt_contour = get_shirt_contour(contours)
     note_contour = get_note_contour(contours)
-    print([cv2.contourArea(c) for c in contours])
 
     if debug:
         blank_image = cv2.drawContours(

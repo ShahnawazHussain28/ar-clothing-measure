@@ -9,13 +9,13 @@ from main import get_measurements_from_image
 app = Flask(__name__)
 cors = CORS(app, origins="*")
 
-print("v-0.1.0")
+VERSION = "v-0.2.8"
 
 
 @app.route("/")
 @cross_origin()
 def hello_world():
-    return "Hello World!"
+    return "Hello World! " + VERSION
 
 
 @app.route("/get-measurements", methods=["POST"])
