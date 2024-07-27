@@ -1,20 +1,24 @@
 import cv2
 import numpy as np
 from flask import Flask, jsonify, request
+from flask_cors import CORS, cross_origin
 
 from main import get_measurements_from_image
 
 app = Flask(__name__)
+cors = CORS(app, origins="*")
 
 print("v-0.1.0")
 
 
 @app.route("/")
+@cross_origin()
 def hello_world():
     return "Hello World!"
 
 
 @app.route("/get-measurements", methods=["POST"])
+@cross_origin()
 def process_image():
     print(request.files)
     if "image" not in request.files:
