@@ -133,6 +133,8 @@ def get_measurements(points, metric_per_pixel):
     measurements["length"] = calculate_length(poi, metric_per_pixel)
     measurements["shoulder"] = calculate_width(poi, metric_per_pixel)
     measurements["sleeve"] = calculate_sleeve(poi, metric_per_pixel)
+    measurements["chest"] = measurements["shoulder"].copy()
+    measurements["belly"] = measurements["shoulder"].copy()
     return measurements
 
 
@@ -148,3 +150,18 @@ def get_shoulder_length(lmlist, metric_per_pixel):
     right_x = lmlist[11][0]
     dist = abs(right_x - left_x) * 1.075 * metric_per_pixel
     return dist
+
+
+def get_belly(weist_l, segmentation_mask, metric_per_pixel):
+    """Returns shoulder length"""
+    threshold = 0.5
+    row = segmentation_mask[weist_l[1]]
+    left = np.where(row[: weist_l[0]] < threshold)[0][-1]
+    right = np.where(row[weist_l[0] :] < threshold)[0][0] + weist_l[0]
+    dist = abs(right - left) * metric_per_pixel
+    return dist
+
+
+def ellipse_circumference(major, minor):
+    """Returns circumference"""
+    return np.pi * (1.5 * (major + minor) - np.sqrt(major * minor))
