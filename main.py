@@ -81,8 +81,8 @@ def get_measurements_from_image(img, debug=False):
         cv2.imshow("eroded", eroded)
 
     contours = get_all_contours(eroded)
-    shirt_contour = get_shirt_contour(contours)
     note_contour = get_note_contour(contours)
+    shirt_contour = get_shirt_contour(contours)
 
     if debug:
         blank_image = cv2.drawContours(
@@ -95,8 +95,10 @@ def get_measurements_from_image(img, debug=False):
         cv2.imshow("shirt contour", blank_image)
         cv2.waitKey(0)
 
-    if shirt_contour is None or note_contour is None:
-        return None
+    if note_contour is None:
+        return {"error": True, "message": "Could not detect note. Please retry"}
+    if shirt_contour is None:
+        return {"error": True, "message": "Could not detect shirt. Please retry"}
 
     note_rect = cv2.boundingRect(note_contour)
     note_width = note_rect[2]

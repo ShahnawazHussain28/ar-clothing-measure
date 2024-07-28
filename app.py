@@ -22,27 +22,23 @@ def hello_world():
 def process_image():
     try:
         if "image" not in request.files:
-            erres = {"error": "No image file found in request"}
-            return str(erres), 400
+            return str({"error": "No image file found in request"}), 400
 
         image_file = request.files["image"]
         if not image_file.mimetype.startswith("image/"):
-            erres = {"error": "Invalid image format"}
-            return str(erres), 400
+            return str({"error": "Invalid image format"}), 400
 
         img_string = image_file.read()
         image = cv2.imdecode(np.fromstring(img_string, np.uint8), cv2.IMREAD_UNCHANGED)
 
         measurements = get_measurements_from_image(image)
-        if measurements is None:
-            erres = {"error": "Could not detect dress in the image. Please re-upload."}
-            return str(erres), 400
+        if "error" in measurements:
+            return str({"error": measurements["message"]}), 400
 
         res = {}
-        for key in measurements:
-            res[key] = round(measurements[key]["distance"], 2)
+        for key, value in measurements.items():
+            res[key] = round(value["distance"], 2)
         return str(res), 200
 
     except Exception as e:
-        erres = {"error": str(e)}
-        return str(erres), 500
+        return str({"error": str(e)}), 500
