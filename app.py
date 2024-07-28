@@ -22,22 +22,22 @@ def hello_world():
 def process_image():
     try:
         if "image" not in request.files:
-            return str({"error": "No image file found in request"}), 400
+            return str({"error": "No image file found in request"}), 401
 
         image_file = request.files["image"]
         if not image_file.mimetype.startswith("image/"):
-            return str({"error": "Invalid image format"}), 400
+            return str({"error": "Invalid image format"}), 402
 
         img_string = image_file.read()
         image = cv2.imdecode(np.fromstring(img_string, np.uint8), cv2.IMREAD_UNCHANGED)
 
         measurements = get_measurements_from_image(image)
         if "error" in measurements:
-            return str({"error": measurements["message"]}), 400
+            return str({"error": measurements["message"]}), 450
 
         res = {}
         for key, value in measurements.items():
-            res[key] = round(value["distance"], 2)
+            res[key] = round(float(value["distance"]), 2)
         return str(res), 200
 
     except Exception as e:
