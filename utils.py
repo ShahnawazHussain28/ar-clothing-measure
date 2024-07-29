@@ -152,12 +152,22 @@ def get_shoulder_length(lmlist, metric_per_pixel):
     return dist
 
 
-def get_belly(weist_l, segmentation_mask, metric_per_pixel):
+def get_chest(chest_l, segmentation_mask, metric_per_pixel):
+    """Returns chest length"""
+    threshold = 0.5
+    row = segmentation_mask[chest_l[1]]
+    left = np.where(row[: chest_l[0]] < threshold)[0][-1]
+    right = np.where(row[chest_l[0] :] < threshold)[0][0] + chest_l[0]
+    dist = abs(right - left) * metric_per_pixel
+    return dist
+
+
+def get_belly(belly_l, segmentation_mask, metric_per_pixel):
     """Returns shoulder length"""
     threshold = 0.5
-    row = segmentation_mask[weist_l[1]]
-    left = np.where(row[: weist_l[0]] < threshold)[0][-1]
-    right = np.where(row[weist_l[0] :] < threshold)[0][0] + weist_l[0]
+    row = segmentation_mask[belly_l[1]]
+    left = np.where(row[: belly_l[0]] < threshold)[0][-1]
+    right = np.where(row[belly_l[0] :] < threshold)[0][0] + belly_l[0]
     dist = abs(right - left) * metric_per_pixel
     return dist
 
