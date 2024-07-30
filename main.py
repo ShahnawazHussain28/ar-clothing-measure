@@ -122,14 +122,5 @@ def get_measurements_from_image(img, debug=False):
         if p[1] <= note_rect[1] + note_rect[3]:
             points = np.delete(points, np.where(points == p), axis=0)
 
-    boundingbox = cv2.boundingRect(points)
-    blank_image = cv2.rectangle(
-        blank_image,
-        (boundingbox[0], boundingbox[1]),
-        (boundingbox[0] + boundingbox[2], boundingbox[1] + boundingbox[3]),
-        (255, 255, 255),
-        1,
-    )
-
     measurements = get_measurements(points, metric_per_pixel)
     return measurements

@@ -4,13 +4,13 @@ import numpy as np
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
 
-from bodyDetection import get_body_measurements
+# from bodyDetection import get_body_measurements
 from main import get_measurements_from_image
 
 app = Flask(__name__)
 cors = CORS(app, origins="*")
 
-VERSION = "v-0.3.0"
+VERSION = "v-1.0.1"
 
 
 @app.route("/")
@@ -39,7 +39,7 @@ def process_image():
 
         res = {}
         for key, value in measurements.items():
-            res[key] = round(float(value["distance"]), 2)
+            res[key] = round(value, 2)
         return str(res), 200
 
     except Exception as e:

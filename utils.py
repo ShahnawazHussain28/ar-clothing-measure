@@ -62,7 +62,7 @@ def calculate_width(points, metric_per_pixel):
         np.linalg.norm(np.array(bottom_right) - np.array(bottom_left))
         * metric_per_pixel
     )
-    return {"start": bottom_left, "end": bottom_right, "distance": dist}
+    return float(dist)
 
 
 def calculate_shoulder_length(points, metric_per_pixel):
@@ -109,7 +109,7 @@ def calculate_sleeve(points, metric_per_pixel):
     total_dist = np.linalg.norm(np.array(left_sleeve) - np.array(right_sleeve))
     sleeve = total_dist - (points["bottom_right"][0] - points["bottom_left"][0])
     dist = (sleeve / 2) * 1.1 * metric_per_pixel
-    return {"start": left_sleeve, "end": right_sleeve, "distance": dist}
+    return float(dist)
 
 
 def calculate_length(points, metric_per_pixel):
@@ -119,7 +119,7 @@ def calculate_length(points, metric_per_pixel):
     dist = (
         np.linalg.norm(np.array(collar_left) - np.array(bottom_left)) * metric_per_pixel
     )
-    return {"start": collar_left, "end": bottom_left, "distance": dist}
+    return float(dist)
 
 
 def get_measurements(points, metric_per_pixel):
@@ -133,8 +133,9 @@ def get_measurements(points, metric_per_pixel):
     measurements["length"] = calculate_length(poi, metric_per_pixel)
     measurements["shoulder"] = calculate_width(poi, metric_per_pixel)
     measurements["sleeve"] = calculate_sleeve(poi, metric_per_pixel)
-    measurements["chest"] = measurements["shoulder"].copy()
-    measurements["belly"] = measurements["shoulder"].copy()
+    circum = measurements["shoulder"] * 2
+    measurements["chest"] = circum
+    measurements["belly"] = circum * 1.05
     return measurements
 
 
