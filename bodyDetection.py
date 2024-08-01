@@ -1,5 +1,6 @@
 from cvzone.PoseModule import PoseDetector
 import cv2
+import numpy as np
 
 from utils import (
     ellipse_circumference,
@@ -29,11 +30,11 @@ def get_body_measurements(height, front, side, debug=False):
         trackCon=0.5,
     )
 
-    if front.shape[0] > 720:
+    if front.shape[0] > 1024:
         front = cv2.resize(
             front, (int(front.shape[1] * 0.25), int(front.shape[0] * 0.25))
         )
-    if side.shape[0] > 720:
+    if side.shape[0] > 1024:
         side = cv2.resize(side, (int(side.shape[1] * 0.25), int(side.shape[0] * 0.25)))
 
     front = detector_front.findPose(front)
@@ -78,11 +79,22 @@ def get_body_measurements(height, front, side, debug=False):
 
     shoulder = abs(front_lmlist[11][0] - front_lmlist[12][0]) * 1.06 * mpp_front
 
+    p1 = front_lmlist[12][:2]
+    p2 = front_lmlist[14][:2]
+    p3 = front_lmlist[16][:2]
+    p1_p2 = np.linalg.norm(np.array(p1) - np.array(p2)) * mpp_front
+    p2_p3 = np.linalg.norm(np.array(p2) - np.array(p3)) * mpp_front
+    arm_len = p1_p2 + p2_p3
+    length = abs(front_lmlist[24][1] - front_lmlist[12][1]) * mpp_front
+
     if debug:
         front = cv2.circle(front, chest_front, 5, (0, 0, 0), -1)
         front = cv2.circle(front, belly_front, 5, (0, 0, 0), -1)
         side = cv2.circle(side, chest_side, 5, (0, 0, 0), -1)
         side = cv2.circle(side, belly_side, 5, (0, 0, 0), -1)
+        front = cv2.circle(front, p1, 5, (0, 0, 0), -1)
+        front = cv2.circle(front, p2, 5, (0, 0, 0), -1)
+        front = cv2.circle(front, p3, 5, (0, 0, 0), -1)
         cv2.imshow("front", front)
         cv2.imshow("side", side)
         cv2.imshow("front_mask", front_results.segmentation_mask)
@@ -93,4 +105,6 @@ def get_body_measurements(height, front, side, debug=False):
         "shoulder": float(round(shoulder, 2)),
         "chest": float(round(chest, 2)),
         "belly": float(round(belly, 2)),
+        "sleeve": float(round(arm_len, 2)),
+        "length": float(round(length, 2)),
     }
