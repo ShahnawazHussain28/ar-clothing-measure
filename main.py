@@ -1,7 +1,7 @@
 from typing import List
 import cv2
 import numpy as np
-from utils import draw_points_on_image, get_measurements, draw_measurements
+from utils import draw_points_on_image, get_measurements
 
 
 CONTRAST = 1  # Experiment with values between 1 (no change) and 10 (high contrast)
