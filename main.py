@@ -66,11 +66,6 @@ def get_measurements_from_image(img, debug=False):
     blurredg = blur_image_n_times(g, 3)
     blurredb = blur_image_n_times(b, 3)
 
-    if debug:
-        cv2.imshow("blurred r", blurredr)
-        cv2.imshow("blurred g", blurredg)
-        cv2.imshow("blurred b", blurredb)
-
     erodedr = detect_edges(blurredr)
     erodedg = detect_edges(blurredg)
     erodedb = detect_edges(blurredb)
@@ -91,9 +86,7 @@ def get_measurements_from_image(img, debug=False):
         blank_image = cv2.drawContours(
             blank_image, [note_contour], 0, (255, 255, 255), 1
         )
-        cv2.imshow("image", img)
         cv2.imshow("shirt contour", blank_image)
-        cv2.waitKey(0)
 
     if note_contour is None:
         return {"error": True, "message": "Could not detect note. Please retry"}
@@ -108,9 +101,9 @@ def get_measurements_from_image(img, debug=False):
     blank_image = cv2.drawContours(blank_image, [shirt_contour], 0, (255, 255, 255), 1)
     blank_image = cv2.drawContours(blank_image, [note_contour], 0, (255, 255, 255), 1)
 
-    gfttr = cv2.goodFeaturesToTrack(erodedr, 100, 0.1, 5)
-    gfttg = cv2.goodFeaturesToTrack(erodedg, 100, 0.1, 5)
-    gfttb = cv2.goodFeaturesToTrack(erodedb, 100, 0.1, 5)
+    gfttr = cv2.goodFeaturesToTrack(erodedr, 1000, 0.05, 5)
+    gfttg = cv2.goodFeaturesToTrack(erodedg, 1000, 0.05, 5)
+    gfttb = cv2.goodFeaturesToTrack(erodedb, 1000, 0.05, 5)
 
     gftt = np.concatenate((gfttr, gfttg), axis=0)
     gftt = np.concatenate((gftt, gfttb), axis=0)
@@ -121,6 +114,19 @@ def get_measurements_from_image(img, debug=False):
     for p in points:
         if p[1] <= note_rect[1] + note_rect[3]:
             points = np.delete(points, np.where(points == p), axis=0)
+
+    if debug:
+        boundingbox = cv2.boundingRect(points)
+        blank_image = cv2.rectangle(
+            blank_image,
+            (boundingbox[0], boundingbox[1]),
+            (boundingbox[0] + boundingbox[2], boundingbox[1] + boundingbox[3]),
+            (255, 255, 255),
+            1,
+        )
+        img = draw_points_on_image(img, points)
+        cv2.imshow("bounding box", img)
+        cv2.waitKey(0)
 
     measurements = get_measurements(points, metric_per_pixel)
     return measurements
