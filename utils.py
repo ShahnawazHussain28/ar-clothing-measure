@@ -16,26 +16,6 @@ def draw_points_on_image(
     return image
 
 
-def draw_measurements(
-    image: MatLike, measurement: dict, color: tuple[int, int, int] = (255, 180, 180)
-):
-    """Draws measurements on image"""
-    image = draw_points_on_image(image, [measurement["start"]], color, 5)
-    image = draw_points_on_image(image, [measurement["end"]], color, 5)
-    image = cv2.line(image, measurement["start"], measurement["end"], color, 2)
-    mid: Point = (np.array(measurement["start"]) + np.array(measurement["end"])) // 2
-    image = cv2.putText(
-        image,
-        f"{int(measurement['distance'])}",
-        (mid[0] + 2, mid[1] - 5),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
-        color,
-        2,
-    )
-    return image
-
-
 def get_bottom_left_right(points):
     """Returns bottom left and right points"""
     bottom_left = max(points, key=lambda p: p[1] - p[0])
@@ -62,7 +42,7 @@ def calculate_width(points, metric_per_pixel):
         np.linalg.norm(np.array(bottom_right) - np.array(bottom_left))
         * metric_per_pixel
     )
-    return {"start": bottom_left, "end": bottom_right, "distance": dist}
+    return float(dist)
 
 
 def calculate_shoulder_length(points, metric_per_pixel):
@@ -73,7 +53,7 @@ def calculate_shoulder_length(points, metric_per_pixel):
         np.linalg.norm(np.array(left_shoulder) - np.array(right_shoulder))
         * metric_per_pixel
     )
-    return {"start": left_shoulder, "end": right_shoulder, "distance": dist}
+    return float(dist)
 
 
 def get_collar_points(points: list[tuple[int, int]]):
@@ -100,7 +80,7 @@ def calculate_collar(points, metric_per_pixel):
         np.linalg.norm(np.array(left_collar) - np.array(right_collar))
         * metric_per_pixel
     )
-    return {"start": left_collar, "end": right_collar, "distance": dist}
+    return float(dist)
 
 
 def calculate_sleeve(points, metric_per_pixel):
@@ -109,7 +89,7 @@ def calculate_sleeve(points, metric_per_pixel):
     total_dist = np.linalg.norm(np.array(left_sleeve) - np.array(right_sleeve))
     sleeve = total_dist - (points["bottom_right"][0] - points["bottom_left"][0])
     dist = (sleeve / 2) * 1.1 * metric_per_pixel
-    return {"start": left_sleeve, "end": right_sleeve, "distance": dist}
+    return float(dist)
 
 
 def calculate_length(points, metric_per_pixel):
@@ -119,7 +99,7 @@ def calculate_length(points, metric_per_pixel):
     dist = (
         np.linalg.norm(np.array(collar_left) - np.array(bottom_left)) * metric_per_pixel
     )
-    return {"start": collar_left, "end": bottom_left, "distance": dist}
+    return float(dist)
 
 
 def get_measurements(points, metric_per_pixel):
@@ -130,11 +110,12 @@ def get_measurements(points, metric_per_pixel):
     poi["left_collar"], poi["right_collar"] = get_collar_points(points)
     poi["left_most"], poi["right_most"] = get_sleeve_points(points)
 
+    width = calculate_width(poi, metric_per_pixel)
     measurements["length"] = calculate_length(poi, metric_per_pixel)
-    measurements["shoulder"] = calculate_width(poi, metric_per_pixel)
+    measurements["shoulder"] = width * 0.85
     measurements["sleeve"] = calculate_sleeve(poi, metric_per_pixel)
-    measurements["chest"] = measurements["shoulder"].copy()
-    measurements["belly"] = measurements["shoulder"].copy()
+    measurements["chest"] = width * 2
+    measurements["belly"] = width * 2
     return measurements
 
 
@@ -149,7 +130,7 @@ def get_shoulder_length(lmlist, metric_per_pixel):
     left_x = lmlist[12][0]
     right_x = lmlist[11][0]
     dist = abs(right_x - left_x) * 1.075 * metric_per_pixel
-    return dist
+    return float(dist)
 
 
 def get_chest(chest_l, segmentation_mask, metric_per_pixel):
@@ -159,7 +140,7 @@ def get_chest(chest_l, segmentation_mask, metric_per_pixel):
     left = np.where(row[: chest_l[0]] < threshold)[0][-1]
     right = np.where(row[chest_l[0] :] < threshold)[0][0] + chest_l[0]
     dist = abs(right - left) * metric_per_pixel
-    return dist
+    return float(dist)
 
 
 def get_belly(belly_l, segmentation_mask, metric_per_pixel):
@@ -169,7 +150,7 @@ def get_belly(belly_l, segmentation_mask, metric_per_pixel):
     left = np.where(row[: belly_l[0]] < threshold)[0][-1]
     right = np.where(row[belly_l[0] :] < threshold)[0][0] + belly_l[0]
     dist = abs(right - left) * metric_per_pixel
-    return dist
+    return float(dist)
 
 
 def ellipse_circumference(major, minor):

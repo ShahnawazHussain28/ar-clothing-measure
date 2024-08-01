@@ -39,7 +39,7 @@ def process_image():
 
         res = {}
         for key, value in measurements.items():
-            res[key] = round(float(value["distance"]), 2)
+            res[key] = round(value, 2)
         return str(res), 200
 
     except Exception as e:
