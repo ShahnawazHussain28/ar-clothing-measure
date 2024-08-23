@@ -1,6 +1,7 @@
 from typing import List
 import cv2
 import numpy as np
+from colorDetection import get_main_color, getColorFromCloth
 from utils import draw_points_on_image, get_measurements
 
 
@@ -115,18 +116,21 @@ def get_measurements_from_image(img, debug=False):
         if p[1] <= note_rect[1] + note_rect[3]:
             points = np.delete(points, np.where(points == p), axis=0)
 
-    boundingbox = cv2.boundingRect(points)
-    blank_image = cv2.rectangle(
-        blank_image,
-        (boundingbox[0], boundingbox[1]),
-        (boundingbox[0] + boundingbox[2], boundingbox[1] + boundingbox[3]),
-        (255, 255, 255),
-        1,
-    )
+    color = getColorFromCloth(img, shirt_contour)
+
     if debug:
+        boundingbox = cv2.boundingRect(points)
+        blank_image = cv2.rectangle(
+            blank_image,
+            (boundingbox[0], boundingbox[1]),
+            (boundingbox[0] + boundingbox[2], boundingbox[1] + boundingbox[3]),
+            (255, 255, 255),
+            1,
+        )
         img = draw_points_on_image(img, points)
         cv2.imshow("bounding box", img)
         cv2.waitKey(0)
 
     measurements = get_measurements(points, metric_per_pixel)
+    measurements["color"] = color.title()
     return measurements

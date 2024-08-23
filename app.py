@@ -39,7 +39,10 @@ def process_image():
 
         res = {}
         for key, value in measurements.items():
-            res[key] = round(value, 2)
+            if type(value) == float:
+                res[key] = round(value, 2)
+            elif type(value) == str:
+                res[key] = value
         return str(res), 200
 
     except Exception as e:
